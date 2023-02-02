@@ -16,3 +16,20 @@ img {
   display: block;
   max-width: 100%;
 }
+
+.container {
+  width: 860px;
+  height: 200px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn {
+  width: 95px;
+  height: 45px;
+  border-radius: 4px;
+}
+
