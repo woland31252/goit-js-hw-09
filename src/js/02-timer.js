@@ -1,7 +1,7 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-// const input = document.getElementById("datetime-picker");
 const refs = {
   input: document.getElementById('datetime-picker'),
   button: document.querySelector('[data-start]'),
@@ -10,25 +10,10 @@ const refs = {
   minute: document.querySelector('[data-minutes]'),
   second: document.querySelector('[data-seconds]'),
 };
-const interval = null;
-const selectedDate = Date.now;
-// input.addEventListener("input", onNumberData);
-refs.button.addEventListener("click", timerOn);
 
-// const options = {
-//   enableTime: true,
-//   time_24hr: true,
-//   defaultDate: new Date(),
-//   minuteIncrement: 1,
-//   onClose(selectedDates) {
-//     console.log(selectedDates[0]);
-//     selectedDate = selectedDates[0];
-//     if (selectedDate < new Date()) {
-//       alert('Please choose a date in the future');
-//       return;
-//     }
-//   },
-// };
+let selectedDate;
+let timerId = null;
+refs.button.addEventListener("click", timerOn);
 
 const options = {
   enableTime: true,
@@ -39,57 +24,60 @@ const options = {
     console.log(selectedDates[0]);
     selectedDate = selectedDates[0];
     if (selectedDate < new Date()) {
-      alert('Please choose a date in the future');
-      refs.button.setAttribute('disabled', true);
+      Notify.failure('Please choose a date in the future');
+      refs.button.disabled = true;
     } else {
-      refs.button.removeAttribute('disabled', '');
+      refs.button.disabled = false;
     }
   },
 };
 
-const fp = flatpickr(refs.input, options);
-// const timerID = setInterval(convertMs, 1000)
-// function onTimerDate() {
-//   timer = setInterval(() => {
-//     document.body.style.backgroundColor = convertMs;
-//   }, 1000);
-//   startBtn.disabled = true;
-//   stopBtn.disabled = false;
-// }
+flatpickr('#datetime-picker', { ...options });
 
 function timerOn() {
   
-  setInterval(() => {
-    const currentDate = Date.now;
+  timerId = setInterval(() => {
+    const currentDate = new Date();
     const deltaTime = selectedDate - currentDate;
     const timeConponent = convertMs(deltaTime);
     console.log(timeConponent);
   }, 1000);
+
+  refs.button.disabled = false;
+  refs.button.disabled = true;
 }
+
 function convertMs(ms) {
-  // Number of milliseconds per unit of time
+  
   const second = 1000;
   const minute = second * 60;
   const hour = minute * 60;
   const day = hour * 24;
 
-  // Remaining days
-  const days = Math.floor(ms / day);
-  // Remaining hours
-  const hours = Math.floor((ms % day) / hour);
-  // Remaining minutes
-  const minutes = Math.floor(((ms % day) % hour) / minute);
-  // Remaining seconds
-  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+  const days = addLeadingZero(Math.floor(ms / day));
+  const hours = addLeadingZero(Math.floor((ms % day) / hour));
+  const minutes = addLeadingZero(Math.floor(((ms % day) % hour) / minute));
+  const seconds = addLeadingZero(Math.floor((((ms % day) % hour) % minute) / second));
 
-  // return timer .field >'[data-days]'.textContent(`${days}`)
+  refs.day.textContent = `${days}`;
+  refs.hour.textContent = `${hours}`;
+  refs.minute.textContent = `${minutes}`;
+  refs.second.textContent = `${seconds}`;
+
+   if (
+     refs.day.textContent === '00' &&
+     refs.hour.textContent === '00' &&
+     refs.minute.textContent === '00' &&
+     refs.second.textContent === '00'
+   ) {
+     clearInterval(timerId);
+     Notify.info("The timer is stopped");
+   }
+
   return { days, hours, minutes, seconds };
+
+  function addLeadingZero(value) {
+    return String(value).padStart(2, 0);
+  };
 }
 
-console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
-console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
-console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
-
-const a = 3;
-const b = 4;
-console.log(a + b);
